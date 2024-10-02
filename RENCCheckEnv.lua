@@ -1,12 +1,12 @@
-local version, properties, imageId = "v2.3.0", {TextColor3 = Color3.new(0, 1, 0)}, "rbxasset://textures/AudioDiscovery/done.png"
+local version = "v2.3.1"
 local githubVersion = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://api.github.com/repos/external-naming-convention/RobloxNamingStandard/releases"))[1].tag_name
 
 if githubVersion == version then
 	version = "Your RENCCheckEnv.lua is up to date!"
 elseif version:split(".")[1] ~= githubVersion:split(".")[1] or version:split(".")[2] ~= githubVersion:split(".")[2] then
-	version, properties, imageId = ("New version of RENCCheckEnv.lua available, your current version: %s, new version: %s. Use loadstring to stay up-to-date."):format(version, githubVersion), {TextColor3 = Color3.fromRGB(215, 90, 74)}, "rbxasset://textures/DevConsole/Error.png"
+	version = ("New version of RENCCheckEnv.lua available, your current version: %s, new version: %s. Use loadstring to stay up-to-date."):format(version, githubVersion)
 else
-	version, properties, imageId = ("New minor version of RENCCheckEnv.lua available, your current version: %s, new version: %s. Use loadstring to stay up-to-date."):format(version, githubVersion), {TextColor3 = Color3.fromRGB(255, 218, 68)}, "rbxasset://textures/DevConsole/Warning.png"
+	version = ("New minor version of RENCCheckEnv.lua available, your current version: %s, new version: %s. Use loadstring to stay up-to-date."):format(version, githubVersion)
 end
 
 
@@ -84,10 +84,7 @@ task.defer(function()
 	print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
 	print("⛔ " .. fails .. " tests failed")
 	print("⚠️ " .. undefined .. " globals are missing aliases")
-	local customprint = customprint or function(str: string, ...)
-        print(str)
-    end
-	customprint(version, properties, imageId)
+	print(version)
 end)
 
 -- Cache
@@ -781,8 +778,6 @@ test("setfpscap", {}, function()
 	local fps0 = getfps()
 	return fps60 .. "fps @60 • " .. fps0 .. "fps @0"
 end)
-
-test("customprint", {})
 
 test("join", {"joingame", "joinserver"})
 
