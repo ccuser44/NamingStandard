@@ -1,298 +1,180 @@
-# Salad Executor API Documentation
+# Crypt
 
-## Base URL
-`https://saladexecutor.pythonanywhere.com`
+The **crypt** library provides methods for the encryption and decryption of string data.
 
-## Endpoints
+Behavior and examples documented on this page are based on Script-Ware.
 
-### 1. Generate Keys
-Generate new keys for user accounts.
+---
 
-- **URL:** `/v0/generate`
-- **Method:** `POST`
-- **Auth Required:** Yes (Admin key required)
+## crypt.base64encode
 
-#### Request Body
-```json
-{
-  "admin": "AdminSecretKey",
-  "length": "weekly|monthly|lifetime",
-  "amount": 1
-}
-```
-
-- `admin`: The secret admin key (required)
-- `length`: Duration of the key (default: "lifetime")
-  - "weekly": 7 days
-  - "monthly": 30 days
-  - "lifetime": Very long duration
-- `amount`: Number of keys to generate (default: 1)
-
-#### Lua Example
 ```lua
-local function generate_keys(admin_key, length, amount)
-    local response = request({
-        Url = "https://saladexecutor.pythonanywhere.com/v0/generate",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            admin = admin_key,
-            length = length,
-            amount = amount
-        })
-    })
-    print(response.Body)
-end
-
--- Usage
-generate_keys("AdminSecretKey", "weekly", 5)
+function crypt.base64encode(data: string): string
 ```
 
-#### Response
-```json
-{
-  "message": "Keys generated successfully!",
-  "keys": "uuid1,uuid2,uuid3"
-}
-```
+Encodes a string of bytes into Base64.
 
-#### Status Codes
-- 201: Created
-- 401: Unauthorized (if admin key is incorrect)
+### Parameters
 
-### 2. Register Account
-Register a new user account.
+ * `data` - The data to encode.
 
-- **URL:** `/v0/register`
-- **Method:** `POST`
-- **Auth Required:** No
+### Aliases
 
-#### Request Body
-```json
-{
-  "username": "string",
-  "password": "string",
-  "email": "string"
-}
-```
+ * `crypt.base64.encode`
+ * `crypt.base64_encode`
+ * `base64.encode`
+ * `base64_encode`
 
-#### Lua Example
+### Example
+
 ```lua
-local function register_account(username, password, email)
-    local hashed_password = crypt.hash(password, "sha512")
-    local response = request({
-        Url = "https://saladexecutor.pythonanywhere.com/v0/register",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            username = username,
-            password = hashed_password,
-            email = email
-        })
-    })
-    print(response.Body)
-end
+local base64 = crypt.base64encode("Hello, World!")
+local raw = crypt.base64decode(base64)
 
--- Usage
-register_account("NewUser", "SecurePassword123", "user@example.com")
+print(base64) --> SGVsbG8sIFdvcmxkIQ==
+print(raw) --> Hello, World!
 ```
 
-#### Response
-```json
-{
-  "message": "User registered successfully"
-}
-```
+---
 
-#### Status Codes
-- 201: Created
-- 409: Conflict (if username already exists)
+## crypt.base64decode
 
-### 3. Login
-Authenticate a user.
-
-- **URL:** `/v0/login`
-- **Method:** `POST`
-- **Auth Required:** No
-
-#### Request Body
-```json
-{
-  "username": "string",
-  "password": "string"
-}
-```
-
-#### Lua Example
 ```lua
-local function login(username, password)
-    local hashed_password = crypt.hash(password, "sha512")
-    local response = request({
-        Url = "https://saladexecutor.pythonanywhere.com/v0/login",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            username = username,
-            password = hashed_password
-        })
-    })
-    print(response.Body)
-end
-
--- Usage
-login("ExistingUser", "UserPassword123")
+function crypt.base64decode(data: string): string
 ```
 
-#### Response
-```json
-{
-  "message": "Successfully logged in"
-}
-```
+Decodes a Base64 string to a string of bytes.
 
-#### Status Codes
-- 200: OK
-- 401: Unauthorized (missing credentials)
-- 403: Forbidden (incorrect credentials)
+### Parameters
 
-### 4. Redeem Key
-Redeem a key to extend account expiry.
+ * `data` - The data to decode.
 
-- **URL:** `/v0/redeem`
-- **Method:** `POST`
-- **Auth Required:** No
+### Aliases
 
-#### Request Body
-```json
-{
-  "username": "string",
-  "key": "uuid-string"
-}
-```
+ * `crypt.base64.decode`
+ * `crypt.base64_decode`
+ * `base64.decode`
+ * `base64_decode`
 
-#### Lua Example
+### Example
+
 ```lua
-local function redeem_key(username, key)
-    local response = request({
-        Url = "https://saladexecutor.pythonanywhere.com/v0/redeem",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            username = username,
-            key = key
-        })
-    })
-    print(response.Body)
-end
+local base64 = crypt.base64encode("Hello, World!")
+local raw = crypt.base64decode(base64)
 
--- Usage
-redeem_key("ExistingUser", "uuid-key-string")
+print(base64) --> SGVsbG8sIFdvcmxkIQ==
+print(raw) --> Hello, World!
 ```
 
-#### Response
-```json
-{
-  "message": "Key redeemed successfully"
-}
-```
+---
 
-#### Status Codes
-- 200: OK
-- 401: Unauthorized (invalid key)
-- 422: Unprocessable Entity (missing key)
+## crypt.encrypt
 
-### 5. Access Script Hub
-Fetch scripts from the script hub.
+`🪲 Compatibility` `🔎 RFC`
 
-- **URL:** `/access/scripthub`
-- **Method:** `GET`
-- **Auth Required:** Yes
-
-#### Query Parameters
-- `username`: User's username
-- `password`: User's password
-- `q`: Search query (default: "script")
-
-#### Lua Example
 ```lua
-local function access_scripthub(username, password, query)
-    local hashed_password = crypt.hash(password, "sha512")
-    local response = request({
-        Url = string.format(
-            "https://saladexecutor.pythonanywhere.com/access/scripthub?username=%s&password=%s&q=%s",
-            game:GetService("HttpService"):UrlEncode(username),
-            game:GetService("HttpService"):UrlEncode(hashed_password),
-            game:GetService("HttpService"):UrlEncode(query)
-        ),
-        Method = "GET"
-    })
-    print(response.Body)
-end
-
--- Usage
-access_scripthub("ExistingUser", "UserPassword123", "aimbot")
+function crypt.encrypt(data: string, key: string, iv: string?, mode: string?): (string, string)
 ```
 
-#### Response
-Returns JSON data from scriptblox.com API.
+Encrypts an unencoded string using AES encryption. Returns the base64 encoded and encrypted string, and the IV.
 
-#### Status Codes
-- 200: OK
-- 401: Unauthorized (missing credentials)
-- 403: Forbidden (incorrect credentials)
+If an AES IV is not provided, a random one will be generated for you, and returned as a 2nd base64 encoded string.
 
-### 6. Initialize
-Fetch initialization data.
+The cipher modes are 'CBC', 'ECB', 'CTR', 'CFB', 'OFB', and 'GCM'. The default is 'CBC'.
 
-- **URL:** `/access/init`
-- **Method:** `GET`
-- **Auth Required:** Yes
+> ### 🪲 Compatibility issues
+> Too few executors support this function and a reliable example cannot be made.
 
-#### Query Parameters
-- `username`: User's username
-- `password`: User's password
+### Parameters
 
-#### Lua Example
+ * `data` - The unencoded content.
+ * `key` - A base64 256-bit key.
+ * `iv` - Optional base64 AES initialization vector.
+ * `mode` - The AES cipher mode.
+
+---
+
+## crypt.decrypt
+
+`🪲 Compatibility` `🔎 RFC`
+
 ```lua
-local function initialize(username, password)
-    local hashed_password = crypt.hash(password, "sha512")
-    local response = request({
-        Url = string.format(
-            "https://saladexecutor.pythonanywhere.com/access/init?username=%s&password=%s",
-            game:GetService("HttpService"):UrlEncode(username),
-            game:GetService("HttpService"):UrlEncode(hashed_password)
-        ),
-        Method = "GET"
-    })
-    loadstring(response.Body, "init")()
-end
-
--- Usage
-initialize("ExistingUser", "UserPassword123")
+function crypt.decrypt(data: string, key: string, iv: string, mode: string): string
 ```
 
-#### Response
-Returns plain text content from a GitHub repository.
+Decrypts the base64 encoded and encrypted content. Returns the raw string.
 
-#### Status Codes
-- 200: OK
-- 401: Unauthorized (missing credentials)
-- 403: Forbidden (incorrect credentials)
+The cipher modes are 'CBC', 'ECB', 'CTR', 'CFB', 'OFB', and 'GCM'.
 
-## Notes
-- All endpoints return JSON responses unless otherwise specified.
-- The `/v0/generate` endpoint requires a secret admin key for authentication. This key is not disclosed in the documentation for security reasons.
-- User sessions are logged for login, key redemption, and access to scripthub and init endpoints.
-- The API uses UUID for key generation.
-- Account expiry times are managed in seconds since epoch.
-- In the Lua examples, we use `game:GetService("HttpService"):JSONEncode()` to convert Lua tables to JSON strings, and `game:GetService("HttpService"):UrlEncode()` to properly encode URL parameters.
-- Passwords are hashed using SHA-512 via `crypt.hash(password, "sha512")` before being sent to the server. This enhances security by ensuring that plain text passwords are never transmitted.
-- Error handling is not included in these examples for brevity. In a production environment, you should add proper error handling and response parsing.
+> ### 🪲 Compatibility issues
+> Too few executors support this function and a reliable example cannot be made.
+
+### Parameters
+
+ * `data` - The base64 encoded and encrypted content.
+ * `key` - A base64 256-bit key.
+ * `iv` - The base64 AES initialization vector.
+ * `mode` - The AES cipher mode.
+
+---
+
+## crypt.generatebytes
+
+```lua
+function crypt.generatebytes(size: number): string
+```
+
+Generates a random sequence of bytes of the given size. Returns the sequence as a base64 encoded string.
+
+### Parameters
+
+ * `size` - The number of bytes to generate.
+
+### Example
+
+```lua
+local bytes = crypt.generatebytes(16)
+print(bytes) --> bXlzcWwgYm9vbGVhbnM=
+print(#crypt.base64decode(bytes)) --> 16
+```
+
+---
+
+## crypt.generatekey
+
+```lua
+function crypt.generatekey(): string
+```
+
+Generates a base64 encoded 256-bit key. The result can be used as the second parameter for the `crypt.encrypt` and `crypt.decrypt` functions.
+
+### Example
+
+```lua
+local bytes = crypt.generatekey()
+print(#crypt.base64decode(bytes)) --> 32 (256 bits)
+```
+
+---
+
+## crypt.hash
+
+```lua
+function crypt.hash(data: string, algorithm: string): string
+```
+
+Returns the result of hashing the data using the given algorithm.
+
+Some algorithms include 'sha1', 'sha384', 'sha512', 'md5', 'sha256', 'sha3-224', 'sha3-256', and 'sha3-512'.
+
+### Parameters
+
+ * `data` - The unencoded content.
+ * `algorithm` - A hash algorithm.
+
+### Example
+
+```lua
+local hash = crypt.hash("Hello, World!", "md5")
+print(hash) --> 65A8E27D8879283831B664BD8B7F0AD4
+```
