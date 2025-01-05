@@ -103,13 +103,41 @@ end)
 
 ---
 
+## table.unfreeze
+
+```lua
+function setreadonly(object: table): ()
+```
+
+If `object` is frozen or read-only then it's un-frozen.
+
+### Parameters
+
+ * `object` - A table or userdata.
+
+### Example
+
+```lua
+local object = {}
+
+table.freeze(object)
+print(table.isfrozen(object)) --> true
+
+table.unfreeze(object)
+print(table.isfrozen(object)) --> false
+```
+
+---
+
 ## isreadonly
+
+`Deprecated`
 
 ```lua
 function isreadonly(object: table): boolean
 ```
 
-Returns whether `object` is frozen or read-only. Identical to `table.isfrozen`.
+Returns whether `object` is frozen or read-only. `isreadonly` is deprecated in favour of `table.isfrozen`.
 
 ### Parameters
 
@@ -151,11 +179,13 @@ print(getmetatable(object)) --> Hello, world!
 
 ## setreadonly
 
+`Deprecated`
+
 ```lua
 function setreadonly(object: table, readonly: boolean): ()
 ```
 
-Sets whether `object` is frozen or read-only.
+Sets whether `object` is frozen or read-only. `setreadonly` is deprecated in favour of `table.freeze` and `table.unfreeze`.
 
 ### Parameters
 
